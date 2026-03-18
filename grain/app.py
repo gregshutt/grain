@@ -38,7 +38,7 @@ def extensions(app):
     :param app: Flask application instance
     :return: None
     """
-    debug_toolbar.init_app(app)
+    #debug_toolbar.init_app(app)
     flask_static_digest.init_app(app)
 
     return None

@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  COMPOSE_PROFILES: assets,web,worker
+  COMPOSE_PROJECT_NAME: grain
+  DOCKER_BUILDKIT: "1"
+  DOCKER_RESTART_POLICY: "no"
+  DOCKER_WEB_HEALTHCHECK_TEST: /bin/true
+  DOCKER_WEB_PORT_FORWARD: "8000"
+  DOCKER_WEB_VOLUME: .:/app
+  FLASK_DEBUG: "true"
+  NODE_ENV: development
+  PYTHONDONTWRITEBYTECODE: "true"
+  SECRET_KEY: insecure_key_for_dev
+  WEB_RELOAD: "true"
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: web-env
+  name: env

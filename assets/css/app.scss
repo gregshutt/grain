@@ -1,0 +1,11 @@
+@import "fonts";
+
+$font-sans-serif: 'Poppins';
+$font-display: 'Poppins';
+
+// no clue why this is needed, seems to be a bug in webpixels
+:root {
+  --x-font-sans-serif: 'Poppins' !important;
+}
+
+@import '@webpixels/css/all';

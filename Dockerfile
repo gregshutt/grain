@@ -86,7 +86,7 @@ USER python
 
 ARG FLASK_DEBUG="false"
 ENV FLASK_DEBUG="${FLASK_DEBUG}" \
-  FLASK_APP="hello.app" \
+  FLASK_APP="grain.app" \
   FLASK_SKIP_DOTENV="true" \
   PYTHONUNBUFFERED="true" \
   PYTHONPATH="." \
