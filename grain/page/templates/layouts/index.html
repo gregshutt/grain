@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ static_url_for('static', filename='css/app.css') }}">
-    
+    <link rel="icon" href="/favicon.svg" />
   </head>
   <body>
     <nav class="navbar navbar-expand-lg px-0 px-lg-3 ">
@@ -16,31 +16,24 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <a class="d-none d-lg-inline-block navbar-brand" href="#">
-          <img src="https://assets.webpixels.io/img/logos/clever-primary.svg"
-            class="img-dark h-rem-7" alt="..." />
-          <img src="https://assets.webpixels.io/img/logos/clever-light.svg"
-            class="img-light h-rem-7" alt="..." />
+          🦀 GRAIN
         </a>
         <div class="navbar-nav align-items-center ms-auto order-lg-last">
-          <a href="#" class="btn btn-sm btn-primary w-100 w-lg-auto"> New project
-          </a>
+          
         </div>
         <div class="collapse navbar-collapse" id="navbarCollapse">
-          <div class="navbar-nav gap-3 py-4 py-lg-0 ">
-            <a class="nav-item nav-link px-lg-3 py-lg-2 bg-accent-lg-hover rounded"
-              href="#" aria-current="page">Dashboard</a>
-            <a class="nav-item nav-link px-lg-3 py-lg-2 bg-accent-lg-hover rounded"
-              href="#">Projects</a>
-            <a class="nav-item nav-link px-lg-3 py-lg-2 bg-accent-lg-hover rounded"
-              href="#">Tasks</a>
-            <a class="nav-item nav-link px-lg-3 py-lg-2 bg-accent-lg-hover rounded"
-              href="#">Messages</a>
-            <a class="nav-item nav-link px-lg-3 py-lg-2 bg-accent-lg-hover rounded"
-              href="#">Settings</a>
-          </div>
+          <ul class="nav nav-underline gap-6 overflow-x border-bottom">
+            <li class="nav-item">
+              <a href="#" class="nav-link active">Dashboard</a>
+            </li>
+          </ul>
         </div>
       </div>
     </nav>
+
+    <div class="container-fluid">
+      {% block body %}{% endblock %}
+    </div>
     <script defer src="{{ static_url_for('static', filename='js/app.js') }}"></script>
   </body>
 </html>
