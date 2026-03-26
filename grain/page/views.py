@@ -3,7 +3,15 @@ import os
 import mimetypes
 import uuid
 from importlib.metadata import version
-from flask import Blueprint, flash, redirect, render_template, Response, request, url_for
+from flask import (
+    Blueprint,
+    flash,
+    redirect,
+    render_template,
+    Response,
+    request,
+    url_for,
+)
 from PIL import Image, ImageOps
 from config import settings, storage
 
@@ -21,6 +29,7 @@ def serve_image(filename):
 
     img = Image.open(io.BytesIO(data))
     img = ImageOps.exif_transpose(img)
+    img = img.convert('RGB')
     img.thumbnail((MAX_WIDTH, MAX_HEIGHT), Image.LANCZOS)
 
     output = io.BytesIO()
@@ -30,6 +39,7 @@ def serve_image(filename):
     return Response(
         output.read(), mimetype=img.format and f"image/{img.format.lower()}"
     )
+
 
 @page.post("/upload")
 def upload():
@@ -46,7 +56,8 @@ def upload():
 
     if file:
         ext = os.path.splitext(file.filename)[1].lower()
-        filename = f"dataset/{uuid.uuid4()}{ext}"
+        base_name = f"dataset/{uuid.uuid4()}"
+        filename = f"{base_name}{ext}"
 
         client = storage.get_minio_client()
 
@@ -56,13 +67,18 @@ def upload():
             data=file,
             length=-1,
             part_size=5 * 1024 * 1024,
-            metadata={"text": text},
+        )
+
+        client.put_object(
+            bucket_name=settings.MINIO_BUCKET,
+            object_name=f"{base_name}.txt",
+            data=io.BytesIO(text.encode("utf-8")),
+            length=len(text.encode("utf-8")),
         )
 
         flash("Upload successful")
 
     return redirect(url_for("page.home"))
-
 
 
 @page.get("/upload")
@@ -76,11 +92,25 @@ def home():
 
     items = []
     objects = client.list_objects(bucket_name=settings.MINIO_BUCKET, prefix="dataset/")
+    seen_bases = set()
     for obj in objects:
-        stat = client.stat_object(settings.MINIO_BUCKET, obj.object_name)
+        if obj.object_name.endswith(".txt"):
+            continue
+        base_name = obj.object_name.rsplit(".", 1)[0]
+        if base_name in seen_bases:
+            continue
+        seen_bases.add(base_name)
+
+        try:
+            txt_response = client.get_object(settings.MINIO_BUCKET, f"{base_name}.txt")
+            text = txt_response.read().decode("utf-8")
+        except:
+            text = ""
+
         items.append(
             {
                 "name": obj.object_name,
+                "text": text,
                 "last_modified": obj.last_modified,
             }
         )
