@@ -8,6 +8,10 @@ data:
   DOCKER_WEB_PORT_FORWARD: "8000"
   DOCKER_WEB_VOLUME: .:/app
   FLASK_DEBUG: "true"
+  MINIO_HOST: minio-api-default.apps.homelab.localdomain
+  MINIO_ACCESS_KEY: miniosandbox
+  MINIO_SECRET_KEY: miniosandbox
+  MINIO_BUCKET: openshift-ai-pipeline
   NODE_ENV: development
   PYTHONDONTWRITEBYTECODE: "true"
   SECRET_KEY: insecure_key_for_dev
