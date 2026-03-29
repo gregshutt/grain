@@ -3,6 +3,7 @@ import faiss
 import numpy as np
 from PIL import Image
 import open_clip
+import uuid
 from config import settings, storage
 
 class Medical:
@@ -26,7 +27,7 @@ class Medical:
         objects = client.list_objects(
             bucket_name=settings.MINIO_BUCKET, prefix="dataset/"
         )
-        print(objects)
+
         items = []
         seen_bases = set()
         for obj in objects:
@@ -47,10 +48,10 @@ class Medical:
 
             if text:
                 items.append((obj.object_name, text))
-        self.add_cases_to_library(items)
+        self.add_cases_to_library([x[0] for x in items], [x[1] for x in items])
 
     def _get_image_embedding(self, image_path):
-        """Helper to process an image and return a normalized embedding."""
+        # processes image and returns normalized embedding
         image = self.preprocess(Image.open(image_path)).unsqueeze(0).to(self.device)
         with torch.no_grad(), torch.cuda.amp.autocast():
             features = self.model.encode_image(image)
@@ -59,13 +60,16 @@ class Medical:
 
     def add_cases_to_library(self, image_paths, clinical_notes):
         # build the searchable database of cases
-        #embeddings = []
-        #for img_path in image_paths:
-        #    embeddings.append(self._get_image_embedding(img_path))
+        embeddings = []
+        for img_path in image_paths:
+            temp_path = f"/tmp/{uuid.uuid4()}"
+            minio=storage.get_minio_client()
+            minio.fget_object(settings.MINIO_BUCKET, img_path, temp_path)
+            embeddings.append(self._get_image_embedding(temp_path))
         
         # stack and add to faiss index
-        #embeddings_matrix = np.vstack(embeddings)
-        #self.index.add(embeddings_matrix)
+        embeddings_matrix = np.vstack(embeddings)
+        self.index.add(embeddings_matrix)
         self.notes_database.extend(clinical_notes)
         print(f"Successfully indexed {len(clinical_notes)} medical cases.")
 
@@ -83,15 +87,3 @@ class Medical:
                 "clinical_note": self.notes_database[idx]
             })
         return results
-
-# --- Example Usage ---
-# librarian = MedicalLibrarian('ViT-B-32', 'my_medical_clip.pt')
-
-# 1. Build your "Knowledge Base" (usually done once)
-# historical_images = ["case_001.png", "case_002.png"]
-# historical_notes = ["Mass in right hilar region...", "Normal cardiac silhouette..."]
-# librarian.add_cases_to_library(historical_images, historical_notes)
-
-# 2. Query a new unknown image
-# top_cases = librarian.query_diagnosis("patient_x_ray.png", top_k=1)
-# print(f"Most likely diagnosis: {top_cases[0]['clinical_note']}")
